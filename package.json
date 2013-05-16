@@ -1,17 +1,22 @@
 {
-    "name": "date-picker",
-    "version": "0.0.1",
-    "root": "kjui",
-    "description": "date-picker",
-    "author": "Stone Lee <istonelee@gmail.com> (http://stonelee.info)",
-    "dependencies": {
-        "$": "$",
-        "widget": "arale/widget/1.0.2/widget",
-        "calendar": "arale/calendar/0.8.0/calendar"
-    },
-    "output": {
-        "date-picker.js": ".",
-        "i18n/lang.js": ".",
-        "i18n/zh-cn/lang.js": "."
-    }
+  "name": "calendar",
+  "version": "1.0.0",
+  "root": "kjui",
+  "description": "日历组件",
+  "author": "Stone Lee <istonelee@gmail.com> (http://stonelee.info)",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/stonelee/kjui-calendar.git"
+  },
+  "bugs": {
+    "url": "https://github.com/stonelee/kjui-calendar/issues"
+  },
+  "dependencies": {
+    "$": "$",
+    "widget": "arale/widget/1.0.2/widget",
+    "arale-calendar": "arale/calendar/0.8.4/calendar"
+  },
+  "output": {
+    "calendar.js": "."
+  }
 }

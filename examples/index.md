@@ -1,40 +1,29 @@
-# calendar
+# 日历
+
+- order: 1
 
 ---
 
+## 基本用法
+
 ````iframe:250
-<div class="row">
-  <input type="text" />
-</div>
-<div class="row">
-  <input id="date" type="text">
-</div>
+<input id="date" type="text">
 
 <script>
-seajs.config({
-  locale: 'zh-cn',
-  preload: ['seajs/plugin-i18n']
-});
-
-seajs.use(['$','date-picker'], function($,DatePicker) {
-  new DatePicker({
+seajs.use(['$', 'calendar'], function($, Calendar) {
+  new Calendar({
     target: '#date'
   });
 });
 </script>
 ````
 
-##auto-render
+## auto-render
 
 ````iframe:250
-<input id="date" type="text" data-widget="date-picker">
+<input id="date" type="text" data-widget="calendar">
 
 <script type="text/javascript">
-seajs.config({
-  locale: 'zh-cn',
-  preload: ['seajs/plugin-i18n']
-});
-
 seajs.use(['widget'], function(Widget) {
   Widget.autoRenderAll();
 });

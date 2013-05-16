@@ -1,24 +1,25 @@
 define(function(require, exports, module) {
   var $ = require('$'),
-    Calendar = require('calendar');
+    lang = require('./lang'),
+    AraleCalendar = require('arale-calendar');
 
-  var template = require('./date-picker.tpl');
-
-  var DatePicker = Calendar.extend({
+  var Calendar = AraleCalendar.extend({
     attrs: {
+
       //output为target，trigger为target后面的元素
       target: null,
 
-      template: template,
+      template: require('./calendar.tpl'),
+      startDay: 1,
 
       trigger: {
         value: '',
         getter: function() {
-          if (!this.$trigger){
+          if (!this._$trigger) {
             var target = $(this.get('target'));
-            this.$trigger = $('<i class="form-trigger form-date-trigger"></i>').insertAfter(target);
+            this._$trigger = $('<i class="icon-form-date-trigger"></i>').insertAfter(target);
           }
-          return this.$trigger;
+          return this._$trigger;
         }
       },
       output: {
@@ -47,22 +48,20 @@ define(function(require, exports, module) {
       }
     },
 
-    setup: function() {
-      DatePicker.superclass.setup.call(this);
-
-      //减少input的宽度
-      var output = $(this.get('output'));
-      output.width(output.width() - 17);
+    templateHelpers: {
+      '_': function(key) {
+        return lang[key] || key;
+      }
     }
 
   });
 
-  DatePicker.autoRender = function(config) {
+  Calendar.autoRender = function(config) {
     config.target = config.element;
     config.element = '';
-    new DatePicker(config);
+    new Calendar(config);
   };
 
-  module.exports = DatePicker;
+  module.exports = Calendar;
 
 });
