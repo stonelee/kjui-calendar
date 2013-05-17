@@ -3,7 +3,15 @@ define(function(require, exports, module) {
     lang = require('./lang'),
     AraleCalendar = require('arale-calendar');
 
-  var Calendar = AraleCalendar.extend({
+  var PatchCalendar = AraleCalendar.extend({
+    show: function() {
+      PatchCalendar.superclass.show.call(this);
+      //对于trigger为<input>, <select>, <a href="javascript:;">时有效
+      $(this.get('trigger')).focus();
+    }
+  });
+
+  var Calendar = PatchCalendar.extend({
     attrs: {
 
       //output为target，trigger为target后面的元素
@@ -17,7 +25,7 @@ define(function(require, exports, module) {
         getter: function() {
           if (!this._$trigger) {
             var target = $(this.get('target'));
-            this._$trigger = $('<i class="icon-form-date-trigger"></i>').insertAfter(target);
+            this._$trigger = $('<a class="icon-form-date-trigger" href="javascript:;"></a>').insertAfter(target);
           }
           return this._$trigger;
         }
