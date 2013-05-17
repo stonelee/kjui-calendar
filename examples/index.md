@@ -1,4 +1,4 @@
-# 日历
+# 基本功能
 
 - order: 1
 
@@ -26,6 +26,27 @@ seajs.use(['$', 'calendar'], function($, Calendar) {
 <script type="text/javascript">
 seajs.use(['widget'], function(Widget) {
   Widget.autoRenderAll();
+});
+</script>
+````
+
+## 日期时间选择
+
+````iframe:250
+<input id="date1" type="text">
+<input id="date2" type="text" value="2013-05-15 08:30:20">
+
+<script>
+seajs.use(['$', 'calendar'], function($, Calendar) {
+  new Calendar({
+    target: '#date1',
+    needTime: true
+  });
+
+  new Calendar({
+    target: '#date2',
+    needTime: true
+  });
 });
 </script>
 ````
