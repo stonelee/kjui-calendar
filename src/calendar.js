@@ -1,8 +1,10 @@
+/*jshint expr:true*/
 define(function(require, exports, module) {
   var $ = require('$'),
     moment = require('moment'),
     Handlebars = require('handlebars'),
     lang = require('./lang'),
+    Tip = require('tip'),
     AraleCalendar = require('arale-calendar');
 
   var PatchCalendar = AraleCalendar.extend({
@@ -154,9 +156,13 @@ define(function(require, exports, module) {
         var html = Handlebars.compile(require('./time.tpl'))({
           needHour: this.get('needHour'),
           needMinute: this.get('needMinute'),
-          needSecond: this.get('needSecond')
+          needSecond: this.get('needSecond'),
+          hours: getNumbers(24),
+          minutes: getNumbers(60, 5),
+          seconds: getNumbers(60, 5)
         });
         this.$('[data-role=time-container]').replaceWith(html);
+
 
         this.delegateEvents({
           'keyup [data-role=hour],[data-role=minute],[data-role=second]': '_changeTime',
@@ -164,7 +170,31 @@ define(function(require, exports, module) {
           'click [data-role=cancel]': '_onCancel',
           'click [data-role=now]': '_selectNow'
         });
+
+        this.get('needHour') && this._bindTip('hour', '+5');
+        this.get('needMinute') && this._bindTip('minute', '-30');
+        this.get('needSecond') && this._bindTip('second', '-70');
       }
+    },
+
+    _bindTip: function(type, pos) {
+      var self = this;
+
+      var tip = new Tip({
+        element: self.$('[data-role=' + type + 's]'),
+        trigger: self.$('[data-role=' + type + ']'),
+        triggerType: 'click',
+        direction: 'up',
+        pointPos: '50%' + pos
+      });
+      tip.delegateEvents({
+        'click li': function(e) {
+          var value = $(e.target).text();
+          self.$('[data-role=' + type + ']').val(value);
+          self._setTimeToOutput();
+          this.hide();
+        }
+      });
     },
 
     show: function() {
@@ -266,6 +296,17 @@ define(function(require, exports, module) {
     }
 
   });
+
+  function getNumbers(max, step) {
+    step = step || 1;
+
+    var results = [];
+    for (var i = 0; i < max; i += step) {
+      results.push(i);
+    }
+    return results;
+  }
+
 
   Calendar.autoRender = function(config) {
     config.target = config.element;

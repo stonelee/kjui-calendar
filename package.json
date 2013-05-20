@@ -16,7 +16,8 @@
     "widget": "arale/widget/1.0.2/widget",
     "moment": "gallery/moment/2.0.0/moment",
     "handlebars": "gallery/handlebars/1.0.1/handlebars",
-    "arale-calendar": "arale/calendar/0.8.4/calendar-debug"
+    "arale-calendar": "arale/calendar/0.8.4/calendar",
+    "tip": "arale/tip/1.1.1/tip"
   },
   "output": {
     "calendar.js": ".",

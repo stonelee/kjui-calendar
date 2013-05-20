@@ -1,9 +1,11 @@
-define("kjui/calendar/1.0.0/calendar-debug", ["./lang-debug", "$-debug", "gallery/moment/2.0.0/moment-debug", "gallery/handlebars/1.0.1/handlebars-debug", "arale/calendar/0.8.4/calendar-debug-debug", "$-debug-debug", "gallery/moment/1.6.2/moment-debug-debug", "arale/overlay/1.0.0/overlay-debug-debug", "arale/position/1.0.0/position-debug-debug", "arale/iframe-shim/1.0.0/iframe-shim-debug-debug", "arale/widget/1.0.3/widget-debug-debug", "arale/base/1.0.1/base-debug-debug", "arale/class/1.0.0/class-debug-debug", "arale/events/1.0.0/events-debug-debug", "arale/widget/1.0.3/templatable-debug-debug", "gallery/handlebars/1.0.0/handlebars-debug-debug"], function(require, exports, module) {
+/*jshint expr:true*/
+define("kjui/calendar/1.0.0/calendar-debug", ["./lang-debug", "$-debug", "gallery/moment/2.0.0/moment-debug", "gallery/handlebars/1.0.1/handlebars-debug", "arale/tip/1.1.1/tip-debug", "arale/popup/1.0.2/popup-debug", "arale/overlay/1.0.1/overlay-debug", "arale/position/1.0.0/position-debug", "arale/iframe-shim/1.0.1/iframe-shim-debug", "arale/widget/1.0.3/widget-debug", "arale/base/1.0.1/base-debug", "arale/class/1.0.0/class-debug", "arale/events/1.0.0/events-debug", "arale/calendar/0.8.4/calendar-debug", "gallery/moment/1.6.2/moment-debug", "arale/overlay/1.0.0/overlay-debug", "arale/iframe-shim/1.0.0/iframe-shim-debug", "arale/widget/1.0.3/templatable-debug", "gallery/handlebars/1.0.0/handlebars-debug"], function(require, exports, module) {
   var $ = require('$-debug'),
     moment = require('gallery/moment/2.0.0/moment-debug'),
     Handlebars = require('gallery/handlebars/1.0.1/handlebars-debug'),
     lang = require('./lang-debug'),
-    AraleCalendar = require('arale/calendar/0.8.4/calendar-debug-debug');
+    Tip = require('arale/tip/1.1.1/tip-debug'),
+    AraleCalendar = require('arale/calendar/0.8.4/calendar-debug');
 
   var PatchCalendar = AraleCalendar.extend({
     setup: function() {
@@ -151,12 +153,16 @@ define("kjui/calendar/1.0.0/calendar-debug", ["./lang-debug", "$-debug", "galler
         }
         this.set('format', format);
 
-        var html = Handlebars.compile('<div class="calendar-time" data-role="time-container"> {{#if needHour}}<input type="text" data-role="hour">时{{/if}} {{#if needMinute}}<input type="text" data-role="minute">分{{/if}} {{#if needSecond}}<input type="text" data-role="second">秒{{/if}} <a class="btn" data-role="now">现在</a> </div> <div class="calendar-footer"> <button class="btn" data-role="ok">确定</button> <button class="btn" data-role="cancel">取消</button> </div>')({
+        var html = Handlebars.compile('<div class="calendar-time" data-role="time-container"> {{#if needHour}}<input type="text" data-role="hour">时{{/if}} {{#if needMinute}}<input type="text" data-role="minute">分{{/if}} {{#if needSecond}}<input type="text" data-role="second">秒{{/if}} <a class="btn" data-role="now">现在</a> </div> <div class="calendar-footer"> <button class="btn" data-role="ok">确定</button> <button class="btn" data-role="cancel">取消</button> </div>{{#if needHour}} <div class="calendar-overlay" data-role="hours"> <ul> {{#each hours}} <li>{{this}}</li> {{/each}} </ul> <div class="calendar-overlay-triangle-shadow" style="left:10px;"></div> <div class="calendar-overlay-triangle" style="left:10px;"></div> </div> {{/if}}{{#if needMinute}} <div class="calendar-overlay" data-role="minutes"> <ul> {{#each minutes}} <li>{{this}}</li> {{/each}} </ul> <div class="calendar-overlay-triangle-shadow" style="left:50px;"></div> <div class="calendar-overlay-triangle" style="left:50px;"></div> </div> {{/if}}{{#if needSecond}} <div class="calendar-overlay" data-role="seconds"> <ul> {{#each seconds}} <li>{{this}}</li> {{/each}} </ul> <div class="calendar-overlay-triangle-shadow" style="left:90px;"></div> <div class="calendar-overlay-triangle" style="left:90px;"></div> </div> {{/if}}')({
           needHour: this.get('needHour'),
           needMinute: this.get('needMinute'),
-          needSecond: this.get('needSecond')
+          needSecond: this.get('needSecond'),
+          hours: getNumbers(24),
+          minutes: getNumbers(60, 5),
+          seconds: getNumbers(60, 5)
         });
         this.$('[data-role=time-container]').replaceWith(html);
+
 
         this.delegateEvents({
           'keyup [data-role=hour],[data-role=minute],[data-role=second]': '_changeTime',
@@ -164,7 +170,31 @@ define("kjui/calendar/1.0.0/calendar-debug", ["./lang-debug", "$-debug", "galler
           'click [data-role=cancel]': '_onCancel',
           'click [data-role=now]': '_selectNow'
         });
+
+        this.get('needHour') && this._bindTip('hour', '+5');
+        this.get('needMinute') && this._bindTip('minute', '-30');
+        this.get('needSecond') && this._bindTip('second', '-70');
       }
+    },
+
+    _bindTip: function(type, pos) {
+      var self = this;
+
+      var tip = new Tip({
+        element: self.$('[data-role=' + type + 's]'),
+        trigger: self.$('[data-role=' + type + ']'),
+        triggerType: 'click',
+        direction: 'up',
+        pointPos: '50%' + pos
+      });
+      tip.delegateEvents({
+        'click li': function(e) {
+          var value = $(e.target).text();
+          self.$('[data-role=' + type + ']').val(value);
+          self._setTimeToOutput();
+          this.hide();
+        }
+      });
     },
 
     show: function() {
@@ -178,6 +208,7 @@ define("kjui/calendar/1.0.0/calendar-debug", ["./lang-debug", "$-debug", "galler
           this.originTime = date;
         } else {
           date = moment();
+          this.setFocus(date);
         }
         this.$('[data-role=hour]').val(date.hour());
         this.$('[data-role=minute]').val(date.minute());
@@ -266,6 +297,17 @@ define("kjui/calendar/1.0.0/calendar-debug", ["./lang-debug", "$-debug", "galler
 
   });
 
+  function getNumbers(max, step) {
+    step = step || 1;
+
+    var results = [];
+    for (var i = 0; i < max; i += step) {
+      results.push(i);
+    }
+    return results;
+  }
+
+
   Calendar.autoRender = function(config) {
     config.target = config.element;
     config.element = '';
@@ -299,7 +341,7 @@ define("kjui/calendar/1.0.0/lang-debug", [], {
     'Today': '今天'
 });
 
-define("kjui/calendar/1.0.0/datetime-debug", ["./calendar-debug", "$-debug", "gallery/moment/2.0.0/moment-debug", "gallery/handlebars/1.0.1/handlebars-debug", "arale/calendar/0.8.4/calendar-debug-debug", "$-debug-debug", "gallery/moment/1.6.2/moment-debug-debug", "arale/overlay/1.0.0/overlay-debug-debug", "arale/position/1.0.0/position-debug-debug", "arale/iframe-shim/1.0.0/iframe-shim-debug-debug", "arale/widget/1.0.3/widget-debug-debug", "arale/base/1.0.1/base-debug-debug", "arale/class/1.0.0/class-debug-debug", "arale/events/1.0.0/events-debug-debug", "arale/widget/1.0.3/templatable-debug-debug", "gallery/handlebars/1.0.0/handlebars-debug-debug"], function(require, exports, module) {
+define("kjui/calendar/1.0.0/datetime-debug", ["./calendar-debug", "$-debug", "gallery/moment/2.0.0/moment-debug", "gallery/handlebars/1.0.1/handlebars-debug", "arale/tip/1.1.1/tip-debug", "arale/popup/1.0.2/popup-debug", "arale/overlay/1.0.1/overlay-debug", "arale/position/1.0.0/position-debug", "arale/iframe-shim/1.0.1/iframe-shim-debug", "arale/widget/1.0.3/widget-debug", "arale/base/1.0.1/base-debug", "arale/class/1.0.0/class-debug", "arale/events/1.0.0/events-debug", "arale/calendar/0.8.4/calendar-debug", "gallery/moment/1.6.2/moment-debug", "arale/overlay/1.0.0/overlay-debug", "arale/iframe-shim/1.0.0/iframe-shim-debug", "arale/widget/1.0.3/templatable-debug", "gallery/handlebars/1.0.0/handlebars-debug"], function(require, exports, module) {
   var $ = require('$-debug'),
     Calendar = require('./calendar-debug');
 
