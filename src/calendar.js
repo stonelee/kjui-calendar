@@ -6,12 +6,82 @@ define(function(require, exports, module) {
     AraleCalendar = require('arale-calendar');
 
   var PatchCalendar = AraleCalendar.extend({
+    setup: function() {
+      AraleCalendar.superclass.setup.call(this);
+
+      var self = this;
+
+      // bind trigger
+      var $trigger = $(this.get('trigger'));
+      $trigger.on(this.get('triggerType'), function() {
+        self.show();
+        setFocusedElement(self.element, self.model);
+      });
+      $trigger.on('keydown', function(ev) {
+        self._keyControl(ev);
+      });
+
+      //日期时间控件特殊处理
+      if (!this.get('needTime')) {
+        $trigger.on('blur', function() {
+          self.hide();
+        });
+
+        self.element.on('mousedown', function(ev) {
+          if ($.browser.msie && parseInt($.browser.version, 10) < 9) {
+            var trigger = $trigger[0];
+            trigger.onbeforedeactivate = function() {
+              window.event.returnValue = false;
+              trigger.onbeforedeactivate = null;
+            };
+          }
+          ev.preventDefault();
+        });
+      }
+
+      // bind model change event
+      var model = this.model;
+      model.on('changeStartday changeMode', function() {
+        self.renderPartial('[data-role=data-container]');
+        self.renderPartial('[data-role=pannel-container]');
+        self.renderPartial('[data-role=month-year-container]');
+        setFocusedElement(self.element, self.model);
+      });
+      model.on('changeMonth changeYear', function() {
+        var mode = model.get('mode');
+        if (mode.date || mode.year) {
+          self.renderPartial('[data-role=data-container]');
+        }
+        self.renderPartial('[data-role=month-year-container]');
+        setFocusedElement(self.element, self.model);
+      });
+      model.on('changeRange', function() {
+        self.renderPartial('[data-role=data-container]');
+      });
+      model.on('refresh', function() {
+        setFocusedElement(self.element, self.model);
+      });
+    },
+
     show: function() {
       PatchCalendar.superclass.show.call(this);
       //对于trigger为<input>, <select>, <a href="javascript:;">时有效
       $(this.get('trigger')).focus();
     }
   });
+
+  function setFocusedElement(element, model) {
+    var current;
+    var mode = model.get('mode');
+    var o = ['date', 'month', 'year'];
+    for (var i = 0; i < o.length; i++) {
+      if (mode[o[i]]) current = o[i];
+    }
+    if (!current) return;
+    var selector = '[data-value=' + model.get(current).current.value + ']';
+    element.find('.focused-element').removeClass('focused-element');
+    element.find(selector).addClass('focused-element');
+  }
 
   var Calendar = PatchCalendar.extend({
     attrs: {
@@ -63,12 +133,23 @@ define(function(require, exports, module) {
       }
     },
 
-    show: function() {
-      Calendar.superclass.show.call(this);
+    setup: function() {
+      Calendar.superclass.setup.call(this);
 
-      if (this.get('needTime') && !this._timeInserted) {
+      if (this.get('needTime')) {
         this.set('hideOnSelect', false);
-        this.set('format', 'YYYY-MM-DD HH:mm:ss');
+
+        var format = 'YYYY-MM-DD ';
+        if (this.get('needHour')) {
+          format += 'HH';
+        }
+        if (this.get('needMinute')) {
+          format += ':mm';
+        }
+        if (this.get('needSecond')) {
+          format += ':ss';
+        }
+        this.set('format', format);
 
         var html = Handlebars.compile(require('./time.tpl'))({
           needHour: this.get('needHour'),
@@ -76,63 +157,106 @@ define(function(require, exports, module) {
           needSecond: this.get('needSecond')
         });
         this.$('[data-role=time-container]').replaceWith(html);
-        this._timeInserted = true;
 
         this.delegateEvents({
-          'click [data-role=hour]': '_changeHour'
+          'keyup [data-role=hour],[data-role=minute],[data-role=second]': '_changeTime',
+          'click [data-role=ok]': '_onOk',
+          'click [data-role=cancel]': '_onCancel',
+          'click [data-role=now]': '_selectNow'
         });
+      }
+    },
 
+    show: function() {
+      Calendar.superclass.show.call(this);
+
+      if (this.get('needTime')) {
         var $output = this.get('output');
         var date = $output.val();
         if (date) {
           date = moment(date);
-          this.$('[data-role=hour]').val(date.hour());
-          this.$('[data-role=minute]').val(date.minute());
-          this.$('[data-role=second]').val(date.second());
+          this.originTime = date;
+        } else {
+          date = moment();
+          this.setFocus(date);
         }
+        this.$('[data-role=hour]').val(date.hour());
+        this.$('[data-role=minute]').val(date.minute());
+        this.$('[data-role=second]').val(date.second());
 
+        $output.val(date.format(this.get('format')));
       }
     },
 
-    _changeHour: function(e) {
-      $(e.target).val(5);
+    _fillDate: function() {
+      Calendar.superclass._fillDate.apply(this, arguments);
 
-      var $output = this.get("output");
+      if (this.get('needTime')) {
+        this._setTimeToOutput();
+      }
+    },
+
+    _changeTime: function(e) {
+      var $input = $(e.target);
+      var value = $input.val();
+      var maxValue = {
+        hour: 23,
+        minute: 59,
+        second: 59
+      };
+
+      value = value.replace(/\D/g, '');
+      if (value) {
+        value = parseInt(value, 10);
+
+        var max = maxValue[$input.attr('data-role')];
+        if (value > max) {
+          value = max;
+        }
+      }
+      $input.val(value);
+
+      this._setTimeToOutput();
+    },
+
+    _setTimeToOutput: function() {
+      var $output = this.get('output');
       var date = $output.val();
       if (date) {
         date = moment(date);
       } else {
         date = moment();
       }
-      date.hour(this.$('[data-role=hour]').val());
-      var value = date.format(this.get("format"));
-      $output.val(value);
-    },
-
-    _fillDate: function(date) {
-      if (!this.model.isInRange(date)) {
-        this.trigger("selectDisabledDate", date);
-        return this;
-      }
-      this.trigger("selectDate", date);
-      var trigger = this.get("trigger");
-      if (!trigger) {
-        return this;
-      }
-      var $output = this.get("output");
-      if (typeof $output[0].value === "undefined") {
-        return this;
-      }
 
       date.hour(this.$('[data-role=hour]').val());
       date.minute(this.$('[data-role=minute]').val());
       date.second(this.$('[data-role=second]').val());
+      $output.val(date.format(this.get('format')));
+    },
 
-      var value = date.format(this.get("format"));
-      $output.val(value);
-      if (this.get("hideOnSelect")) {
-        this.hide();
+    _onOk: function() {
+      this.hide();
+    },
+    _onCancel: function() {
+      var value;
+      if (this.originTime) {
+        value = this.originTime.format(this.get('format'));
+      } else {
+        value = '';
       }
+      this.get('output').val(value);
+      this.hide();
+    },
+    _selectNow: function() {
+      var today = moment().format('YYYY-MM-DD');
+      var date = this.model.selectDate(today);
+
+      date = moment();
+      this.$('[data-role=hour]').val(date.hour());
+      this.$('[data-role=minute]').val(date.minute());
+      this.$('[data-role=second]').val(date.second());
+
+      this._fillDate(date);
     },
 
     templateHelpers: {

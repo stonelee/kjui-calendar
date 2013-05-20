@@ -19,6 +19,7 @@
     "arale-calendar": "arale/calendar/0.8.4/calendar-debug"
   },
   "output": {
-    "calendar.js": "."
+    "calendar.js": ".",
+    "datetime.js": "."
   }
 }

@@ -2,10 +2,9 @@
 
 ---
 
-基于[arale-calendar](http://aralejs.org/calendar/)，提供了应用于kjui的日历功能，按照国内习惯进行了封装
+基于[arale-calendar](http://aralejs.org/calendar/)，提供了日历时间功能，按照国内习惯进行了封装
 
 ---
-
 
 ## 配置
 
@@ -15,6 +14,21 @@
 
 其他配置请参照[arale-calendar](http://aralejs.org/calendar/)。
 
-## TODO
+### needTime `Boolean`
 
-点击页面overlay不消失
+设为true，显示时间功能。默认只显示小时和分钟。如果设置needSecond为true，则可以显示秒。
+
+##
+
+## 最佳实践
+
+````iframe:250
+<input id="date" type="text" data-widget="calendar">
+<input id="date" type="text" data-widget="datetime">
+
+<script type="text/javascript">
+seajs.use(['widget'], function(Widget) {
+  Widget.autoRenderAll();
+});
+</script>
+````

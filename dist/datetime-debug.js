@@ -1,26 +1,3 @@
-define("kjui/calendar/1.0.0/lang-debug", [], {
-    'Su': '日',
-    'Mo': '一',
-    'Tu': '二',
-    'We': '三',
-    'Th': '四',
-    'Fr': '五',
-    'Sa': '六',
-    'Jan': '一月',
-    'Feb': '二月',
-    'Mar': '三月',
-    'Apr': '四月',
-    'May': '五月',
-    'Jun': '六月',
-    'Jul': '七月',
-    'Aug': '八月',
-    'Sep': '九月',
-    'Oct': '十月',
-    'Nov': '十一月',
-    'Dec': '十二月',
-    'Today': '今天'
-});
-
 define("kjui/calendar/1.0.0/calendar-debug", ["./lang-debug", "$-debug", "gallery/moment/2.0.0/moment-debug", "gallery/handlebars/1.0.1/handlebars-debug", "arale/calendar/0.8.4/calendar-debug-debug", "$-debug-debug", "gallery/moment/1.6.2/moment-debug-debug", "arale/overlay/1.0.0/overlay-debug-debug", "arale/position/1.0.0/position-debug-debug", "arale/iframe-shim/1.0.0/iframe-shim-debug-debug", "arale/widget/1.0.3/widget-debug-debug", "arale/base/1.0.1/base-debug-debug", "arale/class/1.0.0/class-debug-debug", "arale/events/1.0.0/events-debug-debug", "arale/widget/1.0.3/templatable-debug-debug", "gallery/handlebars/1.0.0/handlebars-debug-debug"], function(require, exports, module) {
   var $ = require('$-debug'),
     moment = require('gallery/moment/2.0.0/moment-debug'),
@@ -296,5 +273,45 @@ define("kjui/calendar/1.0.0/calendar-debug", ["./lang-debug", "$-debug", "galler
   };
 
   module.exports = Calendar;
+
+});
+
+define("kjui/calendar/1.0.0/lang-debug", [], {
+    'Su': '日',
+    'Mo': '一',
+    'Tu': '二',
+    'We': '三',
+    'Th': '四',
+    'Fr': '五',
+    'Sa': '六',
+    'Jan': '一月',
+    'Feb': '二月',
+    'Mar': '三月',
+    'Apr': '四月',
+    'May': '五月',
+    'Jun': '六月',
+    'Jul': '七月',
+    'Aug': '八月',
+    'Sep': '九月',
+    'Oct': '十月',
+    'Nov': '十一月',
+    'Dec': '十二月',
+    'Today': '今天'
+});
+
+define("kjui/calendar/1.0.0/datetime-debug", ["./calendar-debug", "$-debug", "gallery/moment/2.0.0/moment-debug", "gallery/handlebars/1.0.1/handlebars-debug", "arale/calendar/0.8.4/calendar-debug-debug", "$-debug-debug", "gallery/moment/1.6.2/moment-debug-debug", "arale/overlay/1.0.0/overlay-debug-debug", "arale/position/1.0.0/position-debug-debug", "arale/iframe-shim/1.0.0/iframe-shim-debug-debug", "arale/widget/1.0.3/widget-debug-debug", "arale/base/1.0.1/base-debug-debug", "arale/class/1.0.0/class-debug-debug", "arale/events/1.0.0/events-debug-debug", "arale/widget/1.0.3/templatable-debug-debug", "gallery/handlebars/1.0.0/handlebars-debug-debug"], function(require, exports, module) {
+  var $ = require('$-debug'),
+    Calendar = require('./calendar-debug');
+
+  var Datetime = Calendar.extend();
+
+  Datetime.autoRender = function(config) {
+    config.target = config.element;
+    config.element = '';
+    config.needTime = true;
+    new Datetime(config);
+  };
+
+  module.exports = Datetime;
 
 });
