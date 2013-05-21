@@ -1,9 +1,11 @@
 {
   "name": "calendar",
+  "family": "kjui",
   "version": "1.0.0",
-  "root": "kjui",
-  "description": "日历组件",
+  "description": "日历时间选择组件",
+  "keywords": ["widget"],
   "author": "Stone Lee <istonelee@gmail.com> (http://stonelee.info)",
+  "homepage": "http://stonelee.info/kjui-calendar",
   "repository": {
     "type": "git",
     "url": "https://github.com/stonelee/kjui-calendar.git"
@@ -11,16 +13,18 @@
   "bugs": {
     "url": "https://github.com/stonelee/kjui-calendar/issues"
   },
-  "dependencies": {
-    "$": "$",
-    "widget": "arale/widget/1.0.2/widget",
-    "moment": "gallery/moment/2.0.0/moment",
-    "handlebars": "gallery/handlebars/1.0.1/handlebars",
-    "arale-calendar": "arale/calendar/0.8.4/calendar",
-    "tip": "arale/tip/1.1.1/tip"
-  },
-  "output": {
-    "calendar.js": ".",
-    "datetime.js": "."
+  "spm": {
+    "alias": {
+      "$": "$",
+      "widget": "arale/widget/1.0.3/widget",
+      "moment": "gallery/moment/2.0.0/moment",
+      "handlebars": "gallery/handlebars/1.0.0/handlebars",
+      "arale-calendar": "arale/calendar/0.8.5/calendar",
+      "tip": "arale/tip/1.1.1/tip"
+    },
+    "output": {
+      "calendar.js": ".",
+      "datetime.js": "."
+    }
   }
 }
