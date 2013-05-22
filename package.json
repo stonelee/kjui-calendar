@@ -22,9 +22,6 @@
       "arale-calendar": "arale/calendar/0.8.5/calendar",
       "tip": "arale/tip/1.1.1/tip"
     },
-    "output": {
-      "calendar.js": ".",
-      "datetime.js": "."
-    }
+    "output": ["calendar.js", "datetime.js"]
   }
 }
